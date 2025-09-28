@@ -14,39 +14,46 @@ import {
 import { dashboard } from '@/routes';
 
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { BookOpen, Folder, LayoutGrid, Route } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import { MapPin } from 'lucide-vue-next';
 import { Factory } from 'lucide-vue-next';
 import { Voicemail } from 'lucide-vue-next';
 import { ChartBarStacked } from 'lucide-vue-next';
+import { computed } from 'vue';
+
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+        roles: ['super_admin', 'inventory_user', 'inventory_manager'],
     },
      {
         title: 'Location',
-        href: '/location',
+        href: '/locations',
         icon: MapPin,
+        roles: ['super_admin', 'inventory_manager'],
     },
      {
         title: 'Manufacturer',
-        href: '/manufacturer',
+        href: '/manufacturers',
         icon: Factory,
+        roles: ['super_admin','inventory_manager'],
     },
      {
         title: 'Asset',
         href: '/assets',
         icon: Voicemail,
+        roles: ['super_admin', 'inventory_user'],
     },
          {
         title: 'Category',
         href: '/categories',
         icon: ChartBarStacked,
+        roles: ['super_admin'],
     },
 
 ];
@@ -63,6 +70,19 @@ const footerNavItems: NavItem[] = [
         icon: BookOpen,
     },
 ];
+
+const page = usePage();
+const userRole = computed(() => page.props.auth.user.role|| null);
+
+
+const filterNavItems = computed(() => {
+    return mainNavItems.filter((item) => {
+        if (!item.roles) return true;
+        
+        return item.roles.includes(userRole.value);
+    });
+});
+
 </script>
 
 <template>
@@ -81,7 +101,7 @@ const footerNavItems: NavItem[] = [
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :items="mainNavItems" />
+            <NavMain :items="filterNavItems" />
         </SidebarContent>
 
         <SidebarFooter>
